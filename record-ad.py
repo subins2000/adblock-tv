@@ -5,10 +5,6 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
-WAVE_OUTPUT_FILENAME = input("Ad name: ") + ".wav"
-RECORD_SECONDS = int(input("Duration: "))
-
-input("Press enter to start recording")
 
 p = pyaudio.PyAudio()
 
@@ -22,19 +18,22 @@ print("* recording")
 
 frames = []
 
-for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    data = stream.read(CHUNK)
-    frames.append(data)
+try:
+    while True:
+        data = stream.read(CHUNK)
+        frames.append(data)
+except KeyboardInterrupt:
+    print("* done recording")
 
-print("* done recording")
+    WAVE_OUTPUT_FILENAME = input("Ad name: ") + ".wav"
 
-stream.stop_stream()
-stream.close()
-p.terminate()
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
 
-wf = wave.open("ads/" + WAVE_OUTPUT_FILENAME, "wb")
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
+    wf = wave.open("ads/" + WAVE_OUTPUT_FILENAME, "wb")
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
