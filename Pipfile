@@ -8,7 +8,4 @@ verify_ssl = true
 [packages]
 pyaudio = "*"
 pydub = "*"
-pydejavu = "*"
-
-[requires]
-python_version = "3.6"
+pydejavu = {file = "https://github.com/worldveil/dejavu/archive/master.zip"}
