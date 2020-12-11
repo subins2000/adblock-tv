@@ -1,17 +1,20 @@
+from config import *
 from dejavu import Dejavu
 from dejavu.logic.recognizer.microphone_recognizer import MicrophoneRecognizer
+from lirc import Lirc
 import os
 import sys
 
-config = {
-    "database": {
-        "host": "127.0.0.1",
-        "user": "username",
-        "password": "password",
-        "database": "adtv",
-    },
-    "database_type": "postgres"
-}
+lirc = Lirc()
+
+muted = False
+
+
+def mute():
+    global muted
+    if not muted:
+        lirc.send_once(REMOTE_KEY_MUTE, REMOTE_NAME)
+        muted = True
 
 
 # decorater used to block function printing to the console
@@ -29,7 +32,7 @@ def blockPrinting(func):
     return func_wrapper
 
 
-djv = Dejavu(config)
+djv = Dejavu(dejavu_config)
 djv.fingerprint_directory("ads/", [".mp3", ".wav"], 3)
 
 
@@ -38,14 +41,25 @@ def record():
     return djv.recognize(MicrophoneRecognizer, seconds=2)
 
 
-while True:
-    results = record()
+def main():
+    while True:
+        results = record()
 
-    for r in results[0]:
-        sn = str(r['song_name'])
-        inco = r['input_confidence']
-        fco = r['fingerprinted_confidence']
+        for r in results[0]:
+            sn = str(r['song_name'])
+            inco = r['input_confidence']
+            fco = r['fingerprinted_confidence']
 
-        # print(r)
-        if inco > 0.05:
-            print("ad - " + sn)
+            # Value will be grater than 100 if there's some sound
+            # A hack to detect volume level
+            if r['input_total_hashes'] > 100:
+                muted = False
+
+            # print(r)
+            if inco > 0.05:
+                print("ad - " + sn)
+                mute()
+
+
+if __name__ == "__main__":
+    main()
