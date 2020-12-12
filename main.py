@@ -7,14 +7,15 @@ import sys
 
 lirc = Lirc()
 
+mute_requested = False
 muted = False
 
 
 def mute():
-    global muted
+    global mute_requested, muted
     if not muted:
         lirc.send_once(REMOTE_KEY_MUTE, REMOTE_NAME)
-        muted = True
+        mute_requested = True
 
 
 # decorater used to block function printing to the console
@@ -38,10 +39,12 @@ djv.fingerprint_directory("ads/", [".mp3", ".wav"], 3)
 
 @blockPrinting
 def record():
-    return djv.recognize(MicrophoneRecognizer, seconds=2)
+    return djv.recognize(MicrophoneRecognizer, seconds=5)
 
 
 def main():
+    global mute_requested, muted
+
     while True:
         results = record()
 
@@ -50,15 +53,23 @@ def main():
             inco = r['input_confidence']
             fco = r['fingerprinted_confidence']
 
+            print()
+            print(r)
+
             # Value will be grater than 100 if there's some sound
             # A hack to detect volume level
-            if r['input_total_hashes'] > 100:
-                muted = False
+            if r['input_total_hashes'] > 200:
+                if mute_requested:
+                    mute()
+                else:
+                    muted = False
 
-            # print(r)
-            if inco > 0.05:
-                print("ad - " + sn)
-                mute()
+                if inco > 0.05:
+                    print("ad - " + sn)
+                    mute()
+            elif mute_requested:
+                muted = True
+                mute_requested = False
 
 
 if __name__ == "__main__":
