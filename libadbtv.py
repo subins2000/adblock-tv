@@ -1,21 +1,7 @@
-from config import *
 from dejavu import Dejavu
 from dejavu.logic.recognizer.microphone_recognizer import MicrophoneRecognizer
-from lirc import Lirc
 import os
 import sys
-
-lirc = Lirc()
-
-mute_requested = False
-muted = False
-
-
-def mute():
-    global mute_requested, muted
-    if not muted:
-        lirc.send_once(REMOTE_KEY_MUTE, REMOTE_NAME)
-        mute_requested = True
 
 
 # decorater used to block function printing to the console
@@ -33,20 +19,18 @@ def blockPrinting(func):
     return func_wrapper
 
 
-djv = Dejavu(dejavu_config)
-djv.fingerprint_directory("ads/", [".mp3", ".wav"], 3)
+class ADBTV:
 
+    def __init__(self, dejavu_config, folder, extensions):
+        self.djv = Dejavu(dejavu_config)
+        self.djv.fingerprint_directory(folder, extensions, 3)
 
-@blockPrinting
-def record():
-    return djv.recognize(MicrophoneRecognizer, seconds=5)
+    @blockPrinting
+    def djv_record(self):
+        return self.djv.recognize(MicrophoneRecognizer, seconds=3)
 
-
-def main():
-    global mute_requested, muted
-
-    while True:
-        results = record()
+    def record(self, confidence=0.05):
+        results = self.djv_record()
 
         for r in results[0]:
             sn = str(r['song_name'])
@@ -59,18 +43,9 @@ def main():
             # Value will be grater than 100 if there's some sound
             # A hack to detect volume level
             if r['input_total_hashes'] > 200:
-                if mute_requested:
-                    mute()
-                else:
-                    muted = False
+                if inco > confidence:
+                    return r
+            else:
+                return None
 
-                if inco > 0.05:
-                    print("ad - " + sn)
-                    mute()
-            elif mute_requested:
-                muted = True
-                mute_requested = False
-
-
-if __name__ == "__main__":
-    main()
+        return False
