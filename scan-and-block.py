@@ -1,10 +1,10 @@
 from config import *
 from libadbtv import *
-from lirc import Lirc
+from lirc import Client
 import os
 import sys
 
-lirc = Lirc()
+lirc = Client()
 
 mute_requested = False
 muted = False
@@ -13,7 +13,7 @@ muted = False
 def mute():
     global mute_requested, muted
     if not muted:
-        lirc.send_once(REMOTE_KEY_MUTE, REMOTE_NAME)
+        lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
         mute_requested = True
 
 
@@ -23,7 +23,7 @@ def main():
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"])
 
     while True:
-        result = adbtv.record(0.05)
+        result = adbtv.record(0.10)
 
         if result is None:
             # Not enough volue i.e muted

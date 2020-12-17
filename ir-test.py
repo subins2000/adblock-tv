@@ -1,5 +1,5 @@
 from config import *
-from lirc import Lirc
+from lirc import Client
 
-lirc = Lirc()
-lirc.send_once(REMOTE_KEY_MUTE, REMOTE_NAME)
+lirc = Client()
+lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)

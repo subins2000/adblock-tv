@@ -9,6 +9,6 @@ verify_ssl = true
 pyaudio = "*"
 pydub = "*"
 pydejavu = {file = "https://github.com/worldveil/dejavu/archive/master.zip"}
-lirc = "*"
+lirc = "0.2.0"
 python-environ = "*"
 eel = "*"
