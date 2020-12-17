@@ -11,3 +11,4 @@ pydub = "*"
 pydejavu = {file = "https://github.com/worldveil/dejavu/archive/master.zip"}
 lirc = "*"
 python-environ = "*"
+eel = "*"
