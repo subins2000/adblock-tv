@@ -23,7 +23,7 @@ def main():
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"])
 
     while True:
-        result = adbtv.record()
+        result = adbtv.record(0.05)
 
         if result is None:
             # Not enough volue i.e muted
@@ -42,7 +42,6 @@ def main():
                 inco = result['input_confidence']
                 fco = result['fingerprinted_confidence']
 
-            if inco > 0.05:
                 print("ad - " + sn)
                 mute()
 
