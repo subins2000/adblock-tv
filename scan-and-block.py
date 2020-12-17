@@ -32,12 +32,12 @@ def main():
                 mute_requested = False
 
         else:
-            if result is False:
-                if mute_requested:
-                    mute()
-                else:
-                    muted = False
+            if mute_requested:
+                mute()
             else:
+                muted = False
+
+            if result is not False:
                 sn = str(result['song_name'])
                 inco = result['input_confidence']
                 fco = result['fingerprinted_confidence']
