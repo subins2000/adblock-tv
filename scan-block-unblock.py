@@ -6,28 +6,23 @@ import sys
 
 lirc = Client()
 
-mute_requested = False
 muted = False
 
 
 def mute():
-    global mute_requested, muted
+    global muted
     if not muted:
         lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
-        mute_requested = True
 
 
 def unmute():
     global muted
     if muted:
         lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
-        mute_requested = False
         muted = False
 
 
 def main():
-    global mute_requested, muted
-
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
 
     while True:
