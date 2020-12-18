@@ -1,10 +1,18 @@
+from array import array
 from config import *
 import eel
 from libadbtv import *
 from lirc import Client
 import os
+from pathlib import Path
+import pyaudio
+from pydub import AudioSegment
+import wave
 
 lirc = Client()
+lastRecordFrames = []
+startRecording = False
+stopRecording = False
 
 state = {
     "active": True,
@@ -24,7 +32,7 @@ muted = False
 
 def mute():
     global muted
-    if not muted:
+    if not muted and startRecording is False:
         lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
 
 
@@ -35,6 +43,75 @@ def unmute():
         muted = False
 
 
+def record():
+    global lastRecordFrames
+
+    CHUNK = 512
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 1
+    RATE = 44100
+    MIN_VOLUME = 300
+
+    p = pyaudio.PyAudio()
+
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
+
+    print("* recording")
+
+    while True:
+        data = stream.read(CHUNK)
+        data_chunk = array('h', data)
+        vol = max(data_chunk)
+
+        if vol >= MIN_VOLUME:
+            lastRecordFrames.append(data)
+
+        if stopRecording:
+            break
+    
+    print("* done recording")
+
+
+@eel.expose
+def recordFinish(adName):
+    WAVE_OUTPUT_FILEPATH = "ads/" + adName
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    wf = wave.open(WAVE_OUTPUT_FILEPATH + ".wav", "wb")
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+    print("Converting to MP3...")
+
+    sound = AudioSegment.from_wav(WAVE_OUTPUT_FILEPATH + ".wav")
+    sound.export(WAVE_OUTPUT_FILEPATH + ".mp3", format='mp3')
+
+    os.remove(WAVE_OUTPUT_FILEPATH + ".wav")
+
+    print("Done")
+
+
+@eel.expose
+def recordStart():
+    startRecording = True
+    eel.spawn(record)
+
+
+@eel.expose
+def recordStop():
+    stopRecording = True
+
+
 def scan():
     eel.sleep(1.0)
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
@@ -42,6 +119,9 @@ def scan():
     state["adlist"] = list(Path("ads/").rglob("*"))
 
     while True:
+        if startRecording is True:
+            continue
+
         if not state["active"]:
             eel.sleep(1.0)
             continue
@@ -64,7 +144,7 @@ def scan():
                 unmute()
         except NoSound:
             pass
-        
+
         eel.sleep(0.01)
 
 

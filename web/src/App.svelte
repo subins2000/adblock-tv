@@ -18,13 +18,13 @@
       </Section>
     </Row>
   </TopAppBar>
+  <TabBar tabs={['Home', 'Ad-List', 'Settings']} let:tab bind:activeTab>
+    <!-- Notice that the `tab` property is required! -->
+    <Tab {tab} on:click={() => activeTab = tab}>
+      <Label>{tab}</Label>
+    </Tab>
+  </TabBar>
   <section>
-    <TabBar tabs={['Home', 'Ad-List']} let:tab bind:activeTab>
-      <!-- Notice that the `tab` property is required! -->
-      <Tab {tab} on:click={() => activeTab = tab}>
-        <Label>{tab}</Label>
-      </Tab>
-    </TabBar>
     {#if activeTab === 'Home'}
       <List class="demo-list" dense>
         {#each state.blocks as block}
@@ -36,6 +36,9 @@
       </List>
     {/if}
     {#if activeTab === 'Ad-List'}
+      <Button on:click={record} variant="raised"><Label>Record</Label></Button>
+      <Button on:click={recordStop} variant="raised"><Label>Stop</Label></Button>
+      <br/>
       <List class="demo-list" dense>
         {#each state.adlist as adname}
           <Item>
@@ -45,10 +48,18 @@
         {/each}
       </List>
     {/if}
+    {#if activeTab === 'Settings'}
+      <Textfield bind:value={state.duration} label="Record duration" type="number" fullwidth />
+      <Textfield bind:value={state.confidence} label="Confidence" type="number" fullwidth />
+      <br/><br/>
+      <Button on:click={saveSettings} variant="raised"><Label>Save</Label></Button>
+    {/if}
   </section>
 </main>
 
 <script>
+  import Button from '@smui/button';
+  import Textfield, {Input, Textarea} from '@smui/textfield';
   import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
   import List, {Group, Item, Graphic, Meta, Separator, Subheader, Text, PrimaryText, SecondaryText} from '@smui/list';
   import Tab, {Icon, Label} from '@smui/tab';
@@ -58,7 +69,9 @@
   let state = {
     active: true,
     blocks: [],
-    adlist: []
+    adlist: [],
+    duration: 2,
+    confidence: 0.15
   }
   let activeTab = "Home"
 
@@ -75,7 +88,21 @@
   }
 
   function updateState(newState) {
-    state = newState;
+    state = newState
+  }
+
+  function saveSettings() {
+    eel.setState(state)
+  }
+
+  function record() {
+    eel.recordStart()
+  }
+
+  function recordStop() {
+    eel.recordStop()
+    const name = prompt("Ad-name")
+    eel.recordFinish(name)
   }
 
   if (typeof eel !== "undefined")
@@ -85,5 +112,8 @@
 <style>
   main {
     margin: -8px;
+  }
+  section {
+    margin: 10px 10px;
   }
 </style>
