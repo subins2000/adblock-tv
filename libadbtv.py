@@ -19,33 +19,40 @@ def blockPrinting(func):
     return func_wrapper
 
 
-class ADBTV:
+class NoSound(BaseException):
+    pass
 
-    def __init__(self, dejavu_config, folder, extensions):
+
+class ADBTV:
+    debug = False
+
+    def __init__(self, dejavu_config, folder, extensions, debug=False):
         self.djv = Dejavu(dejavu_config)
         self.djv.fingerprint_directory(folder, extensions, 3)
+        self.debug = debug
 
     @blockPrinting
-    def djv_record(self):
-        return self.djv.recognize(MicrophoneRecognizer, seconds=3)
+    def djv_record(self, seconds):
+        return self.djv.recognize(MicrophoneRecognizer, seconds=seconds)
 
-    def record(self, confidence=0.05):
-        results = self.djv_record()
+    def record(self, seconds=5, confidence=0.05):
+        results = self.djv_record(seconds)
 
         for r in results[0]:
             sn = str(r['song_name'])
             inco = r['input_confidence']
             fco = r['fingerprinted_confidence']
 
-            print()
-            print(r)
+            if self.debug:
+                print()
+                print(r)
 
-            # Value will be grater than 100 if there's some sound
+            # Value will be grater than 200 if there's some sound
             # A hack to detect volume level
             if r['input_total_hashes'] > 200:
-                if inco > confidence:
+                if inco >= confidence:
                     return r
             else:
-                return None
+                raise NoSound
 
         return False
