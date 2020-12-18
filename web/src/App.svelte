@@ -18,15 +18,49 @@
       </Section>
     </Row>
   </TopAppBar>
+  <section>
+    <TabBar tabs={['Home', 'Ad-List']} let:tab bind:activeTab>
+      <!-- Notice that the `tab` property is required! -->
+      <Tab {tab} on:click={() => activeTab = tab}>
+        <Label>{tab}</Label>
+      </Tab>
+    </TabBar>
+    {#if activeTab === 'Home'}
+      <List class="demo-list" dense>
+        {#each state.blocks as block}
+          <Item>
+            <Graphic class="material-icons">stop_circle</Graphic>
+            <Text>{block}</Text>
+          </Item>
+        {/each}
+      </List>
+    {/if}
+    {#if activeTab === 'Ad-List'}
+      <List class="demo-list" dense>
+        {#each state.adlist as adname}
+          <Item>
+            <Graphic class="material-icons">stop_circle</Graphic>
+            <Text>{adname}</Text>
+          </Item>
+        {/each}
+      </List>
+    {/if}
+  </section>
 </main>
 
 <script>
   import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
+  import List, {Group, Item, Graphic, Meta, Separator, Subheader, Text, PrimaryText, SecondaryText} from '@smui/list';
+  import Tab, {Icon, Label} from '@smui/tab';
+  import TabBar from '@smui/tab-bar';
   import IconButton from '@smui/icon-button';
   
   let state = {
-    active: true
-  };
+    active: true,
+    blocks: [],
+    adlist: []
+  }
+  let activeTab = "Home"
 
   function resume() {
     eel.setState({
@@ -43,7 +77,9 @@
   function updateState(newState) {
     state = newState;
   }
-  eel.expose(updateState);
+
+  if (typeof eel !== "undefined")
+    eel.expose(updateState, "updateState");
 </script>
 
 <style>

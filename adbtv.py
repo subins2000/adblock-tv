@@ -7,7 +7,9 @@ import os
 lirc = Client()
 
 state = {
-    "active": True
+    "active": True,
+    "blocks": [],
+    "adlist": []
 }
 
 @eel.expose
@@ -37,6 +39,8 @@ def scan():
     eel.sleep(1.0)
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
 
+    state["adlist"] = list(Path("ads/").rglob("*"))
+
     while True:
         if not state["active"]:
             eel.sleep(1.0)
@@ -51,6 +55,10 @@ def scan():
                 fco = result['fingerprinted_confidence']
 
                 print("ad - " + sn)
+                state.blocks.append("Detected ad '", sn, "'. Confidence - ", inco)
+
+                eel.updateState(state)
+
                 mute()
             else:
                 unmute()
