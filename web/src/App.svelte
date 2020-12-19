@@ -26,6 +26,15 @@
   </TabBar>
   <section>
     {#if activeTab === 'Home'}
+      <div class="mdc-typography--headline6">Controls</div><br/>
+      <Button on:click={mute} variant="raised"><Label>Power</Label></Button>
+      {#if muted}
+        <Button on:click={unmute} variant="raised"><Label>Unmute</Label></Button>
+      {:else}
+        <Button on:click={mute} variant="raised"><Label>Mute</Label></Button>
+      {/if}
+      <br/><br/>
+      <div class="mdc-typography--headline6">Log</div>
       <List class="demo-list" dense>
         {#each state.blocks as block}
           <Item>
@@ -80,6 +89,7 @@
     confidence: 0.15
   }
   let activeTab = "Home"
+  let muted = false
   let recordDisabled = false
   let stopDisabled = true
 
@@ -93,6 +103,16 @@
     eel.setState({
       active: false
     })
+  }
+
+  function mute() {
+    muted = true
+    eel.mute()
+  }
+
+  function unmute() {
+    muted = false
+    eel.unmute()
   }
 
   function updateState(newState) {
