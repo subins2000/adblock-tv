@@ -36,9 +36,12 @@
       </List>
     {/if}
     {#if activeTab === 'Ad-List'}
+      <div class="mdc-typography--headline6">Add New Advertisement</div><br/>
       <Button on:click={record} variant="raised" disabled={recordDisabled}><Label>Record</Label></Button>
       <Button on:click={recordStop} variant="raised" disabled={stopDisabled}><Label>Stop</Label></Button>
-      <br/>
+      <br/><br/>
+      <div class="mdc-typography--headline6">Ad-List</div><br/>
+      <Button on:click={updateIPFS} variant="raised"><Label>Update From IPFS</Label></Button>
       <List class="demo-list" dense>
         {#each state.adlist as adname}
           <Item>
@@ -60,6 +63,7 @@
 </main>
 
 <script>
+  import "@material/typography/mdc-typography.scss";
   import Button from '@smui/button';
   import Textfield, {Input, Textarea} from '@smui/textfield';
   import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
@@ -117,6 +121,8 @@
     const name = prompt("Ad-name")
     eel.recordFinish(name)
   }
+
+  function updateIPFS() {}
 
   if (typeof eel !== "undefined") {
     eel.expose(updateState, "updateState");
