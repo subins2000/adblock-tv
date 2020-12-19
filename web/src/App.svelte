@@ -132,6 +132,8 @@
         duration: localStorage['duration'],
         confidence: localStorage['confidence']
       })
+    } else {
+      eel.getState()
     }
   }
 </script>
