@@ -4,7 +4,7 @@ import eel
 from libadbtv import *
 from lirc import Client
 import os
-from pathlib import Path
+import glob
 import pyaudio
 from pydub import AudioSegment
 import wave
@@ -34,6 +34,11 @@ state = {
 def setState(newState):
     state.update(newState)
     print(state)
+    eel.updateState(state)
+
+
+@eel.expose
+def getState():
     eel.updateState(state)
 
 
@@ -138,7 +143,8 @@ def scan():
     eel.sleep(1.0)
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
 
-    state["adlist"] = list(Path("ads/").rglob("*"))
+    state["adlist"] = os.listdir("ads/")
+    eel.updateState(state)
 
     while True:
         if not state["active"] or startRecording is True:
@@ -146,7 +152,7 @@ def scan():
             continue
 
         try:
-            result = adbtv.record(state.duration, state.confidence)
+            result = adbtv.record(state['duration'], state['confidence'])
 
             if type(result) is tuple:
                 sn = str(result['song_name'])
@@ -170,8 +176,11 @@ def scan():
 def main():
     eel.init(os.path.join(os.path.realpath(os.path.dirname(__file__)), 'web', 'public'))
 
+    def callback(page, sockets):
+        pass
+
     eel.spawn(scan)
-    eel.start('index.html', mode=False, host="0.0.0.0", port=8100)
+    eel.start('index.html', mode=False, host="0.0.0.0", port=8100, close_callback=callback)
 
 
 if __name__ == "__main__":
