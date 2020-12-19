@@ -96,7 +96,12 @@
   }
 
   function saveSettings() {
-    eel.setState(state)
+    localStorage['duration'] = state.duration
+    localStorage['confidence'] = state.confidence
+    eel.updateSettings({
+      duration: localStorage['duration'],
+      confidence: localStorage['confidence']
+    })
   }
 
   function record() {
@@ -113,8 +118,16 @@
     eel.recordFinish(name)
   }
 
-  if (typeof eel !== "undefined")
+  if (typeof eel !== "undefined") {
     eel.expose(updateState, "updateState");
+
+    if (typeof localStorage['duration'] !== 'undefined') {
+      eel.updateSettings({
+        duration: localStorage['duration'],
+        confidence: localStorage['confidence']
+      })
+    }
+  }
 </script>
 
 <style>

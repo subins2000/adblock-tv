@@ -37,6 +37,14 @@ def setState(newState):
     eel.updateState(state)
 
 
+@eel.expose
+def updateSettings(settings):
+    state["duration"] = settings["duration"]
+    state["confidence"] = settings["confidence"]
+    print(state)
+    eel.updateState(state)
+
+
 muted = False
 
 
