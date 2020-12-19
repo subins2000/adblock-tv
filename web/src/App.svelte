@@ -36,8 +36,8 @@
       </List>
     {/if}
     {#if activeTab === 'Ad-List'}
-      <Button on:click={record} variant="raised"><Label>Record</Label></Button>
-      <Button on:click={recordStop} variant="raised"><Label>Stop</Label></Button>
+      <Button on:click={record} variant="raised" disabled={recordDisabled}><Label>Record</Label></Button>
+      <Button on:click={recordStop} variant="raised" disabled={stopDisabled}><Label>Stop</Label></Button>
       <br/>
       <List class="demo-list" dense>
         {#each state.adlist as adname}
@@ -49,7 +49,9 @@
       </List>
     {/if}
     {#if activeTab === 'Settings'}
-      <Textfield bind:value={state.duration} label="Record duration" type="number" fullwidth />
+      <Label>Record duration</Label>
+      <Textfield bind:value={state.duration} label="Record duration" type="number" fullwidth /><br/>
+      <Label>Confidence</Label>
       <Textfield bind:value={state.confidence} label="Confidence" type="number" fullwidth />
       <br/><br/>
       <Button on:click={saveSettings} variant="raised"><Label>Save</Label></Button>
@@ -74,6 +76,8 @@
     confidence: 0.15
   }
   let activeTab = "Home"
+  let recordDisabled = false
+  let stopDisabled = true
 
   function resume() {
     eel.setState({
@@ -97,10 +101,14 @@
 
   function record() {
     eel.recordStart()
+    recordDisabled = true
+    stopDisabled = false
   }
 
   function recordStop() {
     eel.recordStop()
+    recordDisabled = false
+    stopDisabled = true
     const name = prompt("Ad-name")
     eel.recordFinish(name)
   }

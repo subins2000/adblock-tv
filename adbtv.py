@@ -25,7 +25,9 @@ MIN_VOLUME = 300
 state = {
     "active": True,
     "blocks": [],
-    "adlist": []
+    "adlist": [],
+    "duration": 2,
+    "confidence": 0.15
 }
 
 @eel.expose
@@ -123,6 +125,8 @@ def recordStop():
 
 
 def scan():
+    global state
+
     eel.sleep(1.0)
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
 
@@ -134,7 +138,7 @@ def scan():
             continue
 
         try:
-            result = adbtv.record(2, 0.15)
+            result = adbtv.record(state.duration, state.confidence)
 
             if type(result) is tuple:
                 sn = str(result['song_name'])
