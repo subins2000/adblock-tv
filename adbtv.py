@@ -13,6 +13,14 @@ lirc = Client()
 lastRecordFrames = []
 startRecording = False
 stopRecording = False
+pyAd = None
+stream = None
+
+CHUNK = 512
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+MIN_VOLUME = 300
 
 state = {
     "active": True,
@@ -44,17 +52,11 @@ def unmute():
 
 
 def record():
-    global lastRecordFrames
+    global lastRecordFrames, stream, pyAd, stopRecording
 
-    CHUNK = 512
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 44100
-    MIN_VOLUME = 300
+    pyAd = pyaudio.PyAudio()
 
-    p = pyaudio.PyAudio()
-
-    stream = p.open(format=FORMAT,
+    stream = pyAd.open(format=FORMAT,
                     channels=CHANNELS,
                     rate=RATE,
                     input=True,
@@ -63,32 +65,35 @@ def record():
     print("* recording")
 
     while True:
+        if stopRecording:
+            break
+
         data = stream.read(CHUNK)
         data_chunk = array('h', data)
         vol = max(data_chunk)
 
         if vol >= MIN_VOLUME:
             lastRecordFrames.append(data)
-
-        if stopRecording:
-            break
+        
+        eel.sleep(0.0001)
     
     print("* done recording")
 
 
 @eel.expose
 def recordFinish(adName):
+    global lastRecordFrames, stream, pyAd
     WAVE_OUTPUT_FILEPATH = "ads/" + adName
 
     stream.stop_stream()
     stream.close()
-    p.terminate()
+    pyAd.terminate()
 
     wf = wave.open(WAVE_OUTPUT_FILEPATH + ".wav", "wb")
     wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setsampwidth(pyAd.get_sample_size(FORMAT))
     wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
+    wf.writeframes(b''.join(lastRecordFrames))
     wf.close()
 
     print("Converting to MP3...")
@@ -98,18 +103,23 @@ def recordFinish(adName):
 
     os.remove(WAVE_OUTPUT_FILEPATH + ".wav")
 
+    stream = None
     print("Done")
 
 
 @eel.expose
 def recordStart():
+    global startRecording, stopRecording
     startRecording = True
+    stopRecording = False
     eel.spawn(record)
 
 
 @eel.expose
 def recordStop():
+    global startRecording, stopRecording
     stopRecording = True
+    startRecording = False
 
 
 def scan():
@@ -119,10 +129,7 @@ def scan():
     state["adlist"] = list(Path("ads/").rglob("*"))
 
     while True:
-        if startRecording is True:
-            continue
-
-        if not state["active"]:
+        if not state["active"] or startRecording is True:
             eel.sleep(1.0)
             continue
 
