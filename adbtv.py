@@ -44,8 +44,8 @@ def getState():
 
 @eel.expose
 def updateSettings(settings):
-    state["duration"] = settings["duration"]
-    state["confidence"] = settings["confidence"]
+    state["duration"] = float(settings["duration"])
+    state["confidence"] = float(settings["confidence"])
     print(state)
     eel.updateState(state)
 
@@ -53,12 +53,14 @@ def updateSettings(settings):
 muted = False
 
 
+@eel.expose
 def mute():
     global muted
     if not muted and startRecording is False:
         lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
 
 
+@eel.expose
 def unmute():
     global muted
     if muted:
@@ -140,7 +142,6 @@ def recordStop():
 def scan():
     global state
 
-    eel.sleep(1.0)
     adbtv = ADBTV(dejavu_config, "ads/", [".mp3", ".wav"], True)
 
     state["adlist"] = os.listdir("ads/")
