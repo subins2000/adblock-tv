@@ -35,7 +35,7 @@ class ADBTV:
     def djv_record(self, seconds):
         return self.djv.recognize(MicrophoneRecognizer, seconds=seconds)
 
-    def record(self, seconds=4, confidence=0.10):
+    def record(self, seconds=4, confidence=0.10, min_confidence=0.03):
         results = self.djv_record(seconds)
 
         for r in results[0]:
@@ -50,9 +50,13 @@ class ADBTV:
             # Value will be grater than 200 if there's some sound
             # A hack to detect volume level
             if r['input_total_hashes'] > 200:
-                if inco >= confidence:
+                if (fco > 0.00 and inco >= min_confidence) or inco > confidence:
                     return r
             else:
                 raise NoSound
 
-        return False
+        if inco <= min_confidence:
+            if self.debug:
+                print()
+                print("ad-over")
+            return False
