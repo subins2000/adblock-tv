@@ -26,8 +26,8 @@ state = {
     "active": True,
     "blocks": [],
     "adlist": [],
-    "duration": 2,
-    "confidence": 0.15
+    "duration": 4,
+    "confidence": 0.08
 }
 
 @eel.expose
@@ -58,6 +58,7 @@ def mute():
     global muted
     if not muted and startRecording is False:
         lirc.send(REMOTE_NAME, REMOTE_KEY_MUTE)
+        muted = True
 
 
 @eel.expose
@@ -91,20 +92,24 @@ def record():
 
         if vol >= MIN_VOLUME:
             lastRecordFrames.append(data)
-        
+
         eel.sleep(0.0001)
-    
+ 
     print("* done recording")
 
 
 @eel.expose
 def recordFinish(adName):
     global lastRecordFrames, stream, pyAd
-    WAVE_OUTPUT_FILEPATH = "ads/" + adName
 
     stream.stop_stream()
     stream.close()
     pyAd.terminate()
+
+    if adName == "":
+        return
+
+    WAVE_OUTPUT_FILEPATH = "ads/" + adName
 
     wf = wave.open(WAVE_OUTPUT_FILEPATH + ".wav", "wb")
     wf.setnchannels(CHANNELS)
@@ -155,13 +160,13 @@ def scan():
         try:
             result = adbtv.record(state['duration'], state['confidence'])
 
-            if type(result) is tuple:
+            if type(result) is dict:
                 sn = str(result['song_name'])
                 inco = result['input_confidence']
                 fco = result['fingerprinted_confidence']
 
                 print("ad - " + sn)
-                state.blocks.append("Detected ad '", sn, "'. Confidence - ", inco)
+                state["blocks"].append("Detected ad '" + sn + "'. Confidence - " + str(inco))
 
                 eel.updateState(state)
 
