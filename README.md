@@ -31,5 +31,13 @@
 
 ## Running
 
-* Record ads by running `record-ad.py`
-* Run the adblocker by running `main.py`
+* Run the adblocker by running `adbtv.py`
+* ADBTV web interface runs on port 8100
+
+Scripts :
+
+* `record-ad.py` - For recording ads
+* `scan.py` - Scan for ads, no blocking
+* `scan-block.py` - Scan for ads, and block (mute) them, but no unmute
+* `scan-block-unblock.py` - Scan, block ads and unblock when no ad is detected
+* `adbtv.py` - Run the web interface and blocker. The main script
