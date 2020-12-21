@@ -35,7 +35,7 @@ class ADBTV:
     def djv_record(self, seconds):
         return self.djv.recognize(MicrophoneRecognizer, seconds=seconds)
 
-    def record(self, seconds=5, confidence=0.05):
+    def record(self, seconds=4, confidence=0.10):
         results = self.djv_record(seconds)
 
         for r in results[0]:
@@ -45,7 +45,7 @@ class ADBTV:
 
             if self.debug:
                 print()
-                print(r)
+                print(results)
 
             # Value will be grater than 200 if there's some sound
             # A hack to detect volume level
