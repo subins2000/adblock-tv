@@ -2,7 +2,15 @@
 
 An AdBlocker (Ad-Muter) for TV. When ads appear in between programs, the TV audio will be muted and when program comes back on, TV is unmuted. Completely offline and runs on a Raspberry Pi.
 
-[Video Demo](https://devfolio.co/submissions/adblock-tv-adbtv)
+[Video Demo + Pictures](https://devfolio.co/submissions/adblock-tv-adbtv).
+
+## Description
+
+A simple, cheap, extension to your Raspberry Pi for blocking/muting ads on TV.
+
+When ads start to appear after a program, ADBTV will recognize the advertisement audio and will send an Infrared signal to the TV asking it to mute. When the ads end, TV will be unmuted and audio will continue.
+
+Audio from set-top-box (STB) is routed to the Raspberry Pi and TV is asked to mute. So, audio will be continuously received in the Raspberry Pi. And when ads end, the TV will unmute again
 
 ## Setup
 
